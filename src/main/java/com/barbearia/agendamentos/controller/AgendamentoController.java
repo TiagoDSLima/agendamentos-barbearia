@@ -99,16 +99,34 @@ public class AgendamentoController {
         }
     }
 
-    // Lista horários disponíveis de um determinado dia
+    // Lista horários disponíveis de um determinado dia, levando em conta o serviço a ser feito
     @GetMapping("/horarios-disponiveis")
-    public List<Agendamento> listarHorariosDisponiveis(
-            @RequestParam("data") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate data
+    public List<LocalDateTime> listarHorariosDisponiveis(
+            @RequestParam("data") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate data,
+            @RequestParam("servico") int servico
     ) {
-        List<Agendamento> agendamentos = agendamentoRepository.findByHorarioInicioBetween(
-                data.atStartOfDay(), data.atTime(23, 59, 59)
-        );
+        List<Agendamento> agendamentos = agendamentoRepository.findByHorarioInicioBetween(data.atStartOfDay(), data.atTime(23, 59, 59));
+        //Pegando todos os horários do dia (sendo ocupados ou não, apenas gerando os horários) através do método da classe HorarioUtils que faz a validação do dia da semana
+        List<LocalDateTime> horariosDisponiveis = com.barbearia.agendamentos.util.HorarioUtils.gerarHorarios(data);
+        Set<LocalDateTime> horariosABloquear = new HashSet<>();
 
-        return agendamentos;
+        //verifica os horários anteriores, por exemplo se tem um horário marcado às 10h, um corte de cabelo (0) não pode ser marcado às 9h45
+        for(Agendamento agendamento: agendamentos){
+            if(servico == 2 || servico == 3) {
+                horariosABloquear.add(agendamento.getHorarioInicio());
+            } else if(servico == 1) {
+                horariosABloquear.add(agendamento.getHorarioInicio());
+                horariosABloquear.add(agendamento.getHorarioInicio().minusMinutes(15));
+            } else if(servico == 0 || servico == 4) {
+                horariosABloquear.add(agendamento.getHorarioInicio());
+                horariosABloquear.add(agendamento.getHorarioInicio().minusMinutes(15));
+                horariosABloquear.add(agendamento.getHorarioInicio().minusMinutes(30));
+            }
+        }
+
+        horariosDisponiveis.removeIf(horariosABloquear::contains);
+
+        return horariosDisponiveis;
     }
 
     // Lista agendamentos de um dia específico

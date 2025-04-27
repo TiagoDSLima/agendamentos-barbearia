@@ -1,4 +1,4 @@
-package com.barbearia.agendamentos.util;
+package com.barbearia.agendamentos.utils;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
