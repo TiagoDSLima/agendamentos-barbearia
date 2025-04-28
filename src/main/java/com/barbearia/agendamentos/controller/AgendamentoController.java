@@ -107,7 +107,7 @@ public class AgendamentoController {
     ) {
         List<Agendamento> agendamentos = agendamentoRepository.findByHorarioInicioBetween(data.atStartOfDay(), data.atTime(23, 59, 59));
         //Pegando todos os horários do dia (sendo ocupados ou não, apenas gerando os horários) através do método da classe HorarioUtils que faz a validação do dia da semana
-        List<LocalDateTime> horariosDisponiveis = com.barbearia.agendamentos.util.HorarioUtils.gerarHorarios(data);
+        List<LocalDateTime> horariosDisponiveis = com.barbearia.agendamentos.utils.HorarioUtils.gerarHorarios(data);
         Set<LocalDateTime> horariosABloquear = new HashSet<>();
 
         //verifica os horários anteriores, por exemplo se tem um horário marcado às 10h, um corte de cabelo (0) não pode ser marcado às 9h45
