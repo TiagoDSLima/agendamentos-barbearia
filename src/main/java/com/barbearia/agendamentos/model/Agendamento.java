@@ -1,5 +1,6 @@
 package com.barbearia.agendamentos.model;
 
+import com.barbearia.agendamentos.enums.ServicoTipo;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -19,7 +20,7 @@ public class Agendamento {
     private Cliente cliente;
 
     @NotBlank(message = "O serviço não pode ser vazio") // Validação de campo não vazio
-    private int servico; // 0 - Cabelo, 1 - Barba, 2 - Sobrancelha, 3 - Pezinho, 4 - Cabelo e Sobrancelha
+    private ServicoTipo servico; // 0 - Cabelo, 1 - Barba, 2 - Sobrancelha, 3 - Pezinho, 4 - Cabelo e Sobrancelha
 
     @NotNull(message = "O horário de início não pode ser nulo") // Validação de horário de início
     private LocalDateTime horarioInicio;
@@ -41,11 +42,11 @@ public class Agendamento {
         this.cliente = cliente;
     }
 
-    public int getServico() {
+    public ServicoTipo getServico() {
         return servico;
     }
 
-    public void setServico(int servico) {
+    public void setServico(ServicoTipo servico) {
         this.servico = servico;
     }
 

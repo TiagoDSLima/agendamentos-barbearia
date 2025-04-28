@@ -1,5 +1,6 @@
 package com.barbearia.agendamentos.controller;
 
+import com.barbearia.agendamentos.enums.ServicoTipo;
 import com.barbearia.agendamentos.model.Agendamento;
 import com.barbearia.agendamentos.model.Cliente;
 import com.barbearia.agendamentos.repository.AgendamentoRepository;
@@ -59,7 +60,7 @@ public class AgendamentoController {
     @GetMapping("/horarios-disponiveis")
     public List<LocalDateTime> listarHorariosDisponiveis(
             @RequestParam("data") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate data,
-            @RequestParam("servico") int servico
+            @RequestParam("servico") ServicoTipo servico
     ) {
         List<Agendamento> agendamentos = agendamentoRepository.findByHorarioInicioBetween(data.atStartOfDay(), data.atTime(23, 59, 59));
         //Pegando todos os horários do dia (sendo ocupados ou não, apenas gerando os horários) através do método da classe HorarioUtils que faz a validação do dia da semana
@@ -69,16 +70,16 @@ public class AgendamentoController {
         //verifica os horários anteriores e posteriores, por exemplo se tem um horário marcado às 10h para barba, um corte de cabelo (0) não pode ser marcado às 9h45, nem nenhum outro agendamento pode ser marcado antes de 10h30
         for(Agendamento agendamento: agendamentos){
             horariosABloquear.add(agendamento.getHorarioInicio());
-            if (servico == 1) {
+            if (servico == ServicoTipo.BARBA) {
                 horariosABloquear.add(agendamento.getHorarioInicio().minusMinutes(15));
-            } else if(servico == 0 || servico == 4) {
+            } else if(servico == ServicoTipo.CABELO || servico == ServicoTipo.CABELO_SOBRANCELHA) {
                 horariosABloquear.add(agendamento.getHorarioInicio().minusMinutes(15));
                 horariosABloquear.add(agendamento.getHorarioInicio().minusMinutes(30));
             }
 
-            if(agendamento.getServico() == 1) {
+            if(agendamento.getServico() == ServicoTipo.BARBA) {
                 horariosABloquear.add(agendamento.getHorarioInicio().plusMinutes(15));
-            } else if(agendamento.getServico() == 0 || agendamento.getServico() == 4) {
+            } else if(agendamento.getServico() == ServicoTipo.CABELO || agendamento.getServico() == ServicoTipo.CABELO_SOBRANCELHA) {
                 horariosABloquear.add(agendamento.getHorarioInicio().plusMinutes(15));
                 horariosABloquear.add(agendamento.getHorarioInicio().plusMinutes(30));
             }
