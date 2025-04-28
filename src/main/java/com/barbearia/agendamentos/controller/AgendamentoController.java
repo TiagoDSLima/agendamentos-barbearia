@@ -13,9 +13,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.*;
-import java.util.stream.Collectors;
+
 
 @RestController
 @RequestMapping("/agendamentos")
@@ -37,18 +36,6 @@ public class AgendamentoController {
     @PostMapping
     public ResponseEntity<?> criar(@RequestBody Agendamento agendamento) {
         try {
-            boolean ocupado = true;
-
-            if(agendamento.getServico() == 2 || agendamento.getServico() == 3) {
-                ocupado = agendamentoRepository.existsByHorarioInicio(agendamento.getHorarioInicio());
-            } else if(agendamento.getServico() == 1) {
-                ocupado = agendamentoRepository.existsByHorarioInicio(agendamento.getHorarioInicio()) || agendamentoRepository.existsByHorarioInicio(agendamento.getHorarioInicio().plusMinutes(15));
-            } else if(agendamento.getServico() == 0 || agendamento.getServico() == 4) {
-                ocupado = agendamentoRepository.existsByHorarioInicio(agendamento.getHorarioInicio()) || agendamentoRepository.existsByHorarioInicio(agendamento.getHorarioInicio().plusMinutes(15)) || agendamentoRepository.existsByHorarioInicio(agendamento.getHorarioInicio().plusMinutes(30));
-            }
-
-            if (ocupado) throw new RuntimeException("Horário já agendado.");
-
             Cliente cliente = agendamento.getCliente();
             Optional<Cliente> clienteExistente = clienteRepository.findByTelefone(cliente.getTelefone());
 
@@ -59,40 +46,9 @@ public class AgendamentoController {
                 agendamento.setCliente(cliente);
             }
 
-            List<Agendamento> agendamentosCriados = new ArrayList<>();
+            Agendamento agendamentoNovo = agendamentoRepository.save(agendamento);
 
-            if(agendamento.getServico() == 2 || agendamento.getServico() == 3) {
-                Agendamento criado = new Agendamento();
-                criado = agendamentoRepository.save(agendamento);
-                agendamentosCriados.add(criado);
-            } else if(agendamento.getServico() == 1) {
-                for (int i = 0; i < 2; i++) {
-                    Agendamento criado = new Agendamento();
-                    Agendamento novoAgendamento = new Agendamento();
-                    novoAgendamento.setHorarioInicio(agendamento.getHorarioInicio());
-                    novoAgendamento.setCliente(agendamento.getCliente());
-                    novoAgendamento.setServico(agendamento.getServico());
-
-                    criado = agendamentoRepository.save(novoAgendamento);
-                    agendamentosCriados.add(criado);
-
-                    agendamento.setHorarioInicio(agendamento.getHorarioInicio().plusMinutes(15));
-                }
-            } else if(agendamento.getServico() == 0 || agendamento.getServico() == 4) {
-                for (int i = 0; i < 3; i++) {
-                    Agendamento criado = new Agendamento();
-                    Agendamento novoAgendamento = new Agendamento();
-                    novoAgendamento.setHorarioInicio(agendamento.getHorarioInicio());
-                    novoAgendamento.setCliente(agendamento.getCliente());
-                    novoAgendamento.setServico(agendamento.getServico());
-
-                    criado = agendamentoRepository.save(novoAgendamento);
-                    agendamentosCriados.add(criado);
-
-                    agendamento.setHorarioInicio(agendamento.getHorarioInicio().plusMinutes(15));
-                }
-            }
-            return ResponseEntity.status(HttpStatus.CREATED).body(agendamentosCriados);
+            return ResponseEntity.status(HttpStatus.CREATED).body(agendamentoNovo);
 
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("erro", e.getMessage()));
@@ -110,17 +66,21 @@ public class AgendamentoController {
         List<LocalDateTime> horariosDisponiveis = com.barbearia.agendamentos.utils.HorarioUtils.gerarHorarios(data);
         Set<LocalDateTime> horariosABloquear = new HashSet<>();
 
-        //verifica os horários anteriores, por exemplo se tem um horário marcado às 10h, um corte de cabelo (0) não pode ser marcado às 9h45
+        //verifica os horários anteriores e posteriores, por exemplo se tem um horário marcado às 10h para barba, um corte de cabelo (0) não pode ser marcado às 9h45, nem nenhum outro agendamento pode ser marcado antes de 10h30
         for(Agendamento agendamento: agendamentos){
-            if(servico == 2 || servico == 3) {
-                horariosABloquear.add(agendamento.getHorarioInicio());
-            } else if(servico == 1) {
-                horariosABloquear.add(agendamento.getHorarioInicio());
+            horariosABloquear.add(agendamento.getHorarioInicio());
+            if (servico == 1) {
                 horariosABloquear.add(agendamento.getHorarioInicio().minusMinutes(15));
             } else if(servico == 0 || servico == 4) {
-                horariosABloquear.add(agendamento.getHorarioInicio());
                 horariosABloquear.add(agendamento.getHorarioInicio().minusMinutes(15));
                 horariosABloquear.add(agendamento.getHorarioInicio().minusMinutes(30));
+            }
+
+            if(agendamento.getServico() == 1) {
+                horariosABloquear.add(agendamento.getHorarioInicio().plusMinutes(15));
+            } else if(agendamento.getServico() == 0 || agendamento.getServico() == 4) {
+                horariosABloquear.add(agendamento.getHorarioInicio().plusMinutes(15));
+                horariosABloquear.add(agendamento.getHorarioInicio().plusMinutes(30));
             }
         }
 
