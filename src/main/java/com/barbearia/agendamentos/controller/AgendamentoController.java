@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.*;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.*;
 
 
@@ -64,9 +63,6 @@ public class AgendamentoController {
             @RequestParam("data") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate data,
             @RequestParam("servico") ServicoTipo servico
     ) {
-        System.out.println("Data recebida: " + data); // LocalDate
-        System.out.println("Data convertida: " + data.atStartOfDay(ZoneId.systemDefault()));
-
         if(data.getDayOfWeek() == DayOfWeek.SUNDAY){
             return new ArrayList<>();
         }
