@@ -20,7 +20,8 @@ public class Agendamento {
     private Cliente cliente;
 
     @NotBlank(message = "O serviço não pode ser vazio") // Validação de campo não vazio
-    private ServicoTipo servico; // 0 - Cabelo, 1 - Barba, 2 - Sobrancelha, 3 - Pezinho, 4 - Cabelo e Sobrancelha
+    @Enumerated(EnumType.STRING)
+    private ServicoTipo servico;
 
     @NotNull(message = "O horário de início não pode ser nulo") // Validação de horário de início
     private LocalDateTime horarioInicio;

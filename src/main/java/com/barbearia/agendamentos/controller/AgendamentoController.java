@@ -12,8 +12,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.*;
 
 
@@ -62,28 +64,16 @@ public class AgendamentoController {
             @RequestParam("data") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate data,
             @RequestParam("servico") ServicoTipo servico
     ) {
-        List<Agendamento> agendamentos = agendamentoRepository.findByHorarioInicioBetween(data.atStartOfDay(), data.atTime(23, 59, 59));
-        //Pegando todos os horários do dia (sendo ocupados ou não, apenas gerando os horários) através do método da classe HorarioUtils que faz a validação do dia da semana
-        List<LocalDateTime> horariosDisponiveis = com.barbearia.agendamentos.utils.HorarioUtils.gerarHorarios(data);
-        Set<LocalDateTime> horariosABloquear = new HashSet<>();
+        System.out.println("Data recebida: " + data); // LocalDate
+        System.out.println("Data convertida: " + data.atStartOfDay(ZoneId.systemDefault()));
 
-        //verifica os horários anteriores e posteriores, por exemplo se tem um horário marcado às 10h para barba, um corte de cabelo (0) não pode ser marcado às 9h45, nem nenhum outro agendamento pode ser marcado antes de 10h30
-        for(Agendamento agendamento: agendamentos){
-            horariosABloquear.add(agendamento.getHorarioInicio());
-            if (servico == ServicoTipo.BARBA) {
-                horariosABloquear.add(agendamento.getHorarioInicio().minusMinutes(15));
-            } else if(servico == ServicoTipo.CABELO || servico == ServicoTipo.CABELO_SOBRANCELHA) {
-                horariosABloquear.add(agendamento.getHorarioInicio().minusMinutes(15));
-                horariosABloquear.add(agendamento.getHorarioInicio().minusMinutes(30));
-            }
-
-            if(agendamento.getServico() == ServicoTipo.BARBA) {
-                horariosABloquear.add(agendamento.getHorarioInicio().plusMinutes(15));
-            } else if(agendamento.getServico() == ServicoTipo.CABELO || agendamento.getServico() == ServicoTipo.CABELO_SOBRANCELHA) {
-                horariosABloquear.add(agendamento.getHorarioInicio().plusMinutes(15));
-                horariosABloquear.add(agendamento.getHorarioInicio().plusMinutes(30));
-            }
+        if(data.getDayOfWeek() == DayOfWeek.SUNDAY){
+            return new ArrayList<>();
         }
+
+        List<Agendamento> agendamentos = agendamentoRepository.findByHorarioInicioBetween(data.atStartOfDay(), data.atTime(23, 59, 59));
+        List<LocalDateTime> horariosDisponiveis = com.barbearia.agendamentos.utils.HorarioUtils.gerarHorarios(data);
+        Set<LocalDateTime> horariosABloquear = com.barbearia.agendamentos.utils.HorarioUtils.gerarHorariosBloqueados(agendamentos, servico);
 
         horariosDisponiveis.removeIf(horariosABloquear::contains);
 
