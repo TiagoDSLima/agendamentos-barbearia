@@ -23,6 +23,17 @@ public class GlobalExceptionHandler {
                 ));
     }
 
+    // Tratando exceções gerais como erros inesperados
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<?> handleIllegalArgument(RuntimeException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(Map.of(
+                        "erro", ex.getMessage(),
+                        "status", HttpStatus.BAD_REQUEST.value(),
+                        "detalhes", "O recurso enviado já existe."
+                ));
+    }
+
     // Tratando exceções específicas quando uma entidade não é encontrada (exemplo: cliente não encontrado)
     @ExceptionHandler(EntityNotFoundException.class)
     public ResponseEntity<?> handleEntityNotFound(EntityNotFoundException ex) {

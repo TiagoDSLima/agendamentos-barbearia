@@ -1,8 +1,6 @@
 package com.barbearia.agendamentos.model;
 
-import com.barbearia.agendamentos.enums.ServicoTipo;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 import java.time.LocalDateTime;
@@ -19,9 +17,9 @@ public class Agendamento {
     @JoinColumn(name = "cliente_id")
     private Cliente cliente;
 
-    @NotBlank(message = "O serviço não pode ser vazio") // Validação de campo não vazio
-    @Enumerated(EnumType.STRING)
-    private ServicoTipo servico;
+    @ManyToOne
+    @JoinColumn(name = "servico_id")
+    private Servico servico;
 
     @NotNull(message = "O horário de início não pode ser nulo") // Validação de horário de início
     private LocalDateTime horarioInicio;
@@ -43,11 +41,11 @@ public class Agendamento {
         this.cliente = cliente;
     }
 
-    public ServicoTipo getServico() {
+    public Servico getServico() {
         return servico;
     }
 
-    public void setServico(ServicoTipo servico) {
+    public void setServico(Servico servico) {
         this.servico = servico;
     }
 

@@ -1,7 +1,7 @@
 package com.barbearia.agendamentos.utils;
 
-import com.barbearia.agendamentos.enums.ServicoTipo;
 import com.barbearia.agendamentos.model.Agendamento;
+import com.barbearia.agendamentos.model.Servico;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -38,23 +38,15 @@ public class HorarioUtils {
     }
 
     //verifica os horários anteriores e posteriores, por exemplo se tem um horário marcado às 10h para barba, um corte de cabelo (0) não pode ser marcado às 9h45, nem nenhum outro agendamento pode ser marcado antes de 10h30
-    public static Set<LocalDateTime> gerarHorariosBloqueados(List<Agendamento> agendamentos, ServicoTipo servico) {
+    public static Set<LocalDateTime> gerarHorariosBloqueados(List<Agendamento> agendamentos, Servico servico) {
         Set<LocalDateTime> horariosABloquear = new HashSet<>();
 
         for(Agendamento agendamento: agendamentos){
             horariosABloquear.add(agendamento.getHorarioInicio());
-            if (servico == ServicoTipo.BARBA) {
-                horariosABloquear.add(agendamento.getHorarioInicio().minusMinutes(15));
-            } else if(servico == ServicoTipo.CABELO || servico == ServicoTipo.CABELO_SOBRANCELHA) {
-                horariosABloquear.add(agendamento.getHorarioInicio().minusMinutes(15));
-                horariosABloquear.add(agendamento.getHorarioInicio().minusMinutes(30));
-            }
 
-            if(agendamento.getServico() == ServicoTipo.BARBA) {
-                horariosABloquear.add(agendamento.getHorarioInicio().plusMinutes(15));
-            } else if(agendamento.getServico() == ServicoTipo.CABELO || agendamento.getServico() == ServicoTipo.CABELO_SOBRANCELHA) {
-                horariosABloquear.add(agendamento.getHorarioInicio().plusMinutes(15));
-                horariosABloquear.add(agendamento.getHorarioInicio().plusMinutes(30));
+            for(int i = 0; i < servico.getDuracao() - 15; i += 15){
+                horariosABloquear.add(agendamento.getHorarioInicio().plusMinutes(i));
+                horariosABloquear.add(agendamento.getHorarioInicio().minusMinutes(i));
             }
         }
 
