@@ -57,6 +57,9 @@ public class AgendamentoController {
 
             Agendamento agendamentoNovo = agendamentoRepository.save(agendamento);
 
+            Optional<Servico> servico = servicoRepository.findById(agendamento.getServico().getId());
+            agendamentoNovo.setServico(servico.get());
+
             return ResponseEntity.status(HttpStatus.CREATED).body(agendamentoNovo);
 
         } catch (RuntimeException e) {
