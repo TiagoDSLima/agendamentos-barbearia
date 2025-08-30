@@ -2,7 +2,7 @@ package com.barbearia.agendamentos.enums;
 
 public enum UsuarioNivel {
 
-    ADMIN("admin");
+    ADMIN("ADMIN");
 
     private String nivel;
 

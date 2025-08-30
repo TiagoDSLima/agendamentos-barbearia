@@ -31,6 +31,15 @@ public class Usuario implements UserDetails {
         return id;
     }
 
+    public Usuario() {
+    }
+
+    public Usuario(String login, String senha, UsuarioNivel nivel) {
+        this.login = login;
+        this.senha = senha;
+        this.nivel = nivel;
+    }
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority("ROLE_ADMIN"));
