@@ -17,16 +17,11 @@ public class HorarioUtils {
     private HorarioUtils() {
     }
 
-    //Gera horário de 9h às 20h caso seja dia de semana, de 8h às 17h caso seja sábado e retorna a lista vazia caso seja domingo
+    //Gera horário de 9h às 20h
     public static List<LocalDateTime> gerarHorarios(LocalDate data) {
         List<LocalDateTime> horarios = new ArrayList<>();
         LocalTime inicio = LocalTime.of(9, 0);
         LocalTime fim = LocalTime.of(19, 45);
-
-        if (data.getDayOfWeek() == DayOfWeek.SATURDAY) {
-            inicio = LocalTime.of(8, 0);
-            fim = LocalTime.of(16, 45);
-        }
 
         LocalTime horarioAtual = inicio;
         while (!horarioAtual.isAfter(fim)) {
@@ -44,10 +39,15 @@ public class HorarioUtils {
         for(Agendamento agendamento: agendamentos){
             horariosABloquear.add(agendamento.getHorarioInicio());
 
-            for(int i = 0; i < servico.getDuracao() - 15; i += 15){
-                horariosABloquear.add(agendamento.getHorarioInicio().plusMinutes(i));
+            for(int i = 15; i < servico.getDuracao(); i += 15){
                 horariosABloquear.add(agendamento.getHorarioInicio().minusMinutes(i));
             }
+
+            for(int i = 15; i < agendamento.getServico().getDuracao(); i += 15){
+                horariosABloquear.add(agendamento.getHorarioInicio().plusMinutes(i));
+            }
+
+
         }
 
         return horariosABloquear;
