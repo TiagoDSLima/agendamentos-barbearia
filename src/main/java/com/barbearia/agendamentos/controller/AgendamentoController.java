@@ -21,7 +21,7 @@ import java.util.*;
 
 @RestController
 @RequestMapping("/agendamentos")
-@CrossOrigin(origins = "http://localhost:8081")
+@CrossOrigin(origins = "http://localhost:3001")
 public class AgendamentoController {
 
     @Autowired
