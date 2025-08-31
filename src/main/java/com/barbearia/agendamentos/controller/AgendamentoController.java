@@ -21,6 +21,7 @@ import java.util.*;
 
 @RestController
 @RequestMapping("/agendamentos")
+@CrossOrigin(origins = "http://localhost:8081")
 public class AgendamentoController {
 
     @Autowired
@@ -73,9 +74,10 @@ public class AgendamentoController {
             @RequestParam("data") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate data,
             @RequestParam("servico") Long idServico
     ) {
-        if(data.getDayOfWeek() == DayOfWeek.SUNDAY){
-            return new ArrayList<>();
-        }
+        // Permitir domingos
+// if(data.getDayOfWeek() == DayOfWeek.SUNDAY){
+//     return new ArrayList<>();
+// }
 
         Servico servico = servicoRepository.findById(idServico).get();
 
